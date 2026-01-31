@@ -11,6 +11,10 @@ foreach(file-path ${example-sources})
     add_executable( ${file-name} ${file-path})
     target_link_libraries(${file-name} PUBLIC unifex)
     add_test(NAME "example-${file-name}" COMMAND ${file-name})
+
+    set_target_properties(${file-name} PROPERTIES
+      FOLDER "examples"
+    )
   endif()
 endforeach()
 
@@ -22,6 +26,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_executable( ${file-name} ${file-path})
     target_link_libraries(${file-name} PUBLIC unifex)
     add_test(NAME "example-${file-name}" COMMAND ${file-name})
+
+    set_target_properties(${file-name} PROPERTIES
+      FOLDER "examples"
+    )
   endforeach()
 else()
   if (NOT UNIFEX_NO_EPOLL)
@@ -32,6 +40,10 @@ else()
       add_executable( ${file-name} ${file-path})
       target_link_libraries(${file-name} PUBLIC unifex)
       add_test(NAME "example-${file-name}" COMMAND ${file-name})
+
+      set_target_properties(${file-name} PROPERTIES
+        FOLDER "examples"
+      )
     endforeach()
   endif()
   if (NOT UNIFEX_NO_LIBURING)
@@ -42,6 +54,10 @@ else()
       add_executable( ${file-name} ${file-path})
       target_link_libraries(${file-name} PUBLIC unifex)
       add_test(NAME "example-${file-name}" COMMAND ${file-name})
+
+      set_target_properties(${file-name} PROPERTIES
+        FOLDER "examples"
+      )
     endforeach()
   endif()
 endif()

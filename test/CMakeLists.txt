@@ -16,3 +16,12 @@ target_link_libraries(any_sender_of_test PUBLIC GTest::gmock_main)
 target_link_libraries(async_manual_reset_event_test PUBLIC GTest::gmock_main)
 target_link_libraries(async_scope_test PUBLIC GTest::gmock_main)
 target_link_libraries(async_scope_v0_test PUBLIC GTest::gmock_main)
+
+
+foreach(file-path ${test-sources})
+    string( REPLACE ".cpp" "" file-path-without-ext ${file-path} )
+    get_filename_component(file-name ${file-path-without-ext} NAME)
+    set_target_properties(${file-name} PROPERTIES
+        FOLDER "test"
+    )
+endforeach()
