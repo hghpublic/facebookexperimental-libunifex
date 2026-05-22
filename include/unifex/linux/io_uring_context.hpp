@@ -1351,6 +1351,14 @@ private:
   port_t port_;
   safe_file_descriptor fd_;
 
+  static constexpr std::uint16_t host_to_network(std::uint16_t value) {
+      if constexpr (std::endian::native == std::endian::little) {
+          return std::byteswap(value);
+      } else {
+          return value;
+      }
+  }
+
   // TODO should this run on the io_context? If so, why?
   void open_socket() noexcept {
     // both IPv4 and IPv6
@@ -1365,7 +1373,7 @@ private:
     UNIFEX_ASSERT(ret != -1);
 
     addr.sin6_family = AF_INET6;
-    addr.sin6_port = htons(port_);
+    addr.sin6_port = host_to_network(port_);
     addr.sin6_addr = in6addr_any;
     ret = bind(fd_.get(), (const struct sockaddr*)&addr, sizeof(addr));
     UNIFEX_ASSERT(ret != -1);
