@@ -1354,17 +1354,19 @@ private:
   port_t port_;
   safe_file_descriptor fd_;
 
+# if __cpp_lib_byteswap >= 202110L
   static constexpr std::uint16_t host_to_network(std::uint16_t value) {
-#   if __has_include(<bit>)
       return (
         std::endian::native == std::endian::little
           ? std::byteswap(value)
           : value
       );
-#   else
-      return htons(value);
-#   endif
   }
+# else
+  static std::uint16_t host_to_network(std::uint16_t value) {
+    return htons(value);
+  }
+# endif // __cpp_lib_byteswap
 
   // TODO should this run on the io_context? If so, why?
   void open_socket() noexcept {
