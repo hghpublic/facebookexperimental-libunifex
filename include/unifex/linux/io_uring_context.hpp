@@ -52,6 +52,9 @@
 #  include <sys/socket.h>
 #  include <sys/uio.h>
 #  include <unistd.h>
+#  if __has_include(<bit>)
+#  include <bit>
+#  endif // __has_include(<bit>)
 
 #  include <unifex/detail/prologue.hpp>
 
@@ -1351,6 +1354,20 @@ private:
   port_t port_;
   safe_file_descriptor fd_;
 
+# if __cpp_lib_byteswap >= 202110L
+  static constexpr std::uint16_t host_to_network(std::uint16_t value) {
+      return (
+        std::endian::native == std::endian::little
+          ? std::byteswap(value)
+          : value
+      );
+  }
+# else
+  static std::uint16_t host_to_network(std::uint16_t value) {
+    return htons(value);
+  }
+# endif // __cpp_lib_byteswap
+
   // TODO should this run on the io_context? If so, why?
   void open_socket() noexcept {
     // both IPv4 and IPv6
@@ -1365,7 +1382,7 @@ private:
     UNIFEX_ASSERT(ret != -1);
 
     addr.sin6_family = AF_INET6;
-    addr.sin6_port = htons(port_);
+    addr.sin6_port = host_to_network(port_);
     addr.sin6_addr = in6addr_any;
     ret = bind(fd_.get(), (const struct sockaddr*)&addr, sizeof(addr));
     UNIFEX_ASSERT(ret != -1);
@@ -1379,4 +1396,4 @@ private:
 
 #  include <unifex/detail/epilogue.hpp>
 
-#endif  // __has_include(<liburing.h>)
+#endif // UNIFEX_NO_LIBURING

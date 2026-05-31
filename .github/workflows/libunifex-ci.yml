@@ -3,15 +3,13 @@ name: libunifex CI
 # Trigger on pushes to all branches and for all pull-requests
 on: [push, pull_request]
 
-env:
-  CMAKE_VERSION: 3.16.2
-  NINJA_VERSION: 1.9.0
-
-
 jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    env:
+      CMAKE_VERSION: ${{ matrix.config.cmake_version || '3.16.2' }}
+      NINJA_VERSION: ${{ matrix.config.ninja_version || '1.9.0' }}
     strategy:
       fail-fast: false
       matrix:
@@ -151,6 +149,33 @@ jobs:
             build_type: RelWithDebInfo,
             cc: "gcc-14", cxx: "g++-14",
             cmake_args: "-D CMAKE_CXX_STANDARD:STRING=20 -D CMAKE_CXX_FLAGS=-fno-exceptions"
+          }
+        - {
+            name: "Linux GCC 14 Debug (C++23)", artifact: "Linux.tar.xz",
+            os: ubuntu-24.04,
+            io_sys: io_uring,
+            build_type: Debug,
+            cc: "gcc-14", cxx: "g++-14",
+            cmake_version: "3.20.0",
+            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=23"
+          }
+        - {
+            name: "Linux GCC 14 Optimised (C++23)", artifact: "Linux.tar.xz",
+            os: ubuntu-24.04,
+            io_sys: io_uring,
+            build_type: RelWithDebInfo,
+            cc: "gcc-14", cxx: "g++-14",
+            cmake_version: "3.20.0",
+            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=23"
+          }
+        - {
+            name: "Linux GCC 14 Optimised noexcept (C++23)", artifact: "Linux.tar.xz",
+            os: ubuntu-24.04,
+            io_sys: io_uring,
+            build_type: RelWithDebInfo,
+            cc: "gcc-14", cxx: "g++-14",
+            cmake_version: "3.20.0",
+            cmake_args: "-D CMAKE_CXX_STANDARD:STRING=23 -D CMAKE_CXX_FLAGS=-fno-exceptions"
           }
         - {
             name: "Linux Clang 15 Debug (C++17)", artifact: "Linux.tar.xz",
@@ -414,7 +439,11 @@ jobs:
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           set(ninja_suffix "linux.zip")
           set(cmake_suffix "Linux-x86_64.tar.gz")
-          set(cmake_dir "cmake-${cmake_version}-Linux-x86_64/bin")
+          if(cmake_version VERSION_GREATER_EQUAL 3.20.0)
+            set(cmake_dir "cmake-${cmake_version}-linux-x86_64/bin")
+          else()
+            set(cmake_dir "cmake-${cmake_version}-Linux-x86_64/bin")
+          endif()
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           set(ninja_suffix "mac.zip")
           set(cmake_suffix "Darwin-x86_64.tar.gz")
